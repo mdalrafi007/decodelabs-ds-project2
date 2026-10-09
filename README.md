@@ -25,7 +25,25 @@ credit-card dataset (`creditcard.csv`: Time, V1-V28, Amount, Class).
 | Business view | Threshold chosen on validation data, cost table with adjustable assumptions, feature importance (impurity, permutation, coefficients) |
 
 ## Results
-Run the notebook and paste the table from `REPORT.md` here.
+Full run on Kaggle (CPU), dataset: ULB *Credit Card Fraud Detection* (284,807 transactions, 492 frauds = 0.173%;
+473 frauds / 283,726 rows after removing 1,081 duplicates). Metrics below are from a **one-time evaluation on an untouched test set**
+(fraud rate 0.167%), at a decision threshold chosen on a separate validation set.
+
+| Model | Precision | Recall | F1 | ROC-AUC | PR-AUC | Train time | Scoring (ms / 1k rows) |
+|---|---|---|---|---|---|---|---|
+| **Random Forest (selected)** | 0.932 | 0.726 | 0.817 | 0.957 | 0.813 | ~122 s | ~7.6 |
+| Logistic Regression | 0.871 | 0.642 | 0.739 | 0.955 | 0.705 | ~2.5 s | ~0.7 |
+
+Selection was made on **validation** PR-AUC (RF 0.875 vs LR 0.818), not on the test set.
+
+**Key findings**
+- Accuracy is meaningless here: predicting "legitimate" for everything scores 99.83% accuracy with 0% recall.
+- **Leakage experiment:** applying SMOTE *before* the split inflated PR-AUC from 0.706 (correct) to 0.991 and precision from 0.047 to 0.973. The honest number is the lower one.
+- Top features by permutation importance: V12, V14, V3, `v_norm` (an engineered feature), V4.
+- Random Forest and Logistic Regression are nearly tied on ROC-AUC (0.957 vs 0.955); the gap shows up on PR-AUC, the metric that matters under extreme imbalance.
+- Test metrics rest on only ~95 fraud cases, so they are noisy (the notebook reports bootstrap confidence intervals).
+
+Full narrative: `REPORT.md`. Charts: `figures/` (12 images).
 
 ## How to run
 **Kaggle (easiest, dataset is one click):** New Notebook -> File -> Import notebook -> upload the `.ipynb`
